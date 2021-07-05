@@ -1,40 +1,18 @@
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const productRoutes = require("./API/product/routes");
-const db = require("./db/models/index");
-const app = express();
+const { Product } = require("../../db/models");
+const slugify = require("slugify");
 
-// Middleware
-app.use(cors());
-app.use(bodyParser.json());
-
-//=============== Product Routes ===============\\
-app.use("/products", productRoutes);
-
-// Update Route
-const run = async () => {
+exports.productFetch = async (req, res) => {
   try {
-    await db.sequelize.sync();
-    console.log("Connection successful");
-    app.listen(8000, () => {
-      console.log("The application is running on localhost:8000");
+    const products = await Product.findAll({
+      attributes: { exclude: ["createdAt", "updatedAt"] },
     });
-  } catch {
-    console.error(error);
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
-run();
-//------------------
-/*
-//--------- List Route---------------\\
-app.get("/products", (req, res) => {
-  // JSON = JavaScript Object Notation
-  res.json(products);
-});
 
-// ----------- Delete Route -----------\\
-app.delete("/products/:productId", (req, res) => {
+exports.deleteProduct = (req, res) => {
   const { productId } = req.params;
   // check if product exists
   //products = products.filter((product) => product.id !== +productId);
@@ -48,10 +26,9 @@ app.delete("/products/:productId", (req, res) => {
     //  give back response 404 product Not Found
     res.status(404).json({ message: "Product Not Found." });
   }
-});
+};
 
-//------------ Create Route------------\\
-app.post("/products", (req, res) => {
+exports.createProduct = (req, res) => {
   // generate ID
   const id = products.length + 1;
   // generate slug (using slugify)
@@ -62,15 +39,13 @@ app.post("/products", (req, res) => {
     slug,
     ...req.body,
   };
-
-  // .push() newCookie onto cookies
-  products.push(newProducts);
+  // .push() newProduct onto products
+  products.push(newProduct);
   // response: 201 CREATED
-  res.status(201).json(newProducts);
-});
+  res.status(201).json(newProduct);
+};
 
-//--------------- Update Route --------------\\
-app.put("/products/:productId", (req, res) => {
+exports.updateProduct = (req, res) => {
   const { productId } = req.params;
   // check if product exists
   const foundProduct = products.find((product) => product.id === +productId);
@@ -85,5 +60,4 @@ app.put("/products/:productId", (req, res) => {
     //  give back response 404 product Not Found
     res.status(404).json({ message: "Product Not Found." });
   }
-});
-*/
+};
