@@ -1,63 +1,61 @@
-const { Product } = require("../../db/models");
-const slugify = require("slugify");
+const { Product, Bakery } = require("../../db/models");
 
-exports.productFetch = async (req, res) => {
+exports.fetchProduct = async (productId, next) => {
+  try {
+    const product = await Product.findByPk(productId);
+    return product;
+  } catch (error) {
+    next(error);
+  }
+};
+//================================\\
+
+exports.productFetch = async (req, res, next) => {
   try {
     const products = await Product.findAll({
-      attributes: { exclude: ["createdAt", "updatedAt"] },
+      attributes: { exclude: ["bakeryId", "createdAt", "updatedAt"] },
+      include: {
+        model: Bakery,
+        as: "bakery",
+        attributes: ["name"],
+      },
     });
     res.json(products);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-exports.deleteProduct = (req, res) => {
-  const { productId } = req.params;
-  // check if product exists
-  //products = products.filter((product) => product.id !== +productId);
-  const foundProduct = products.find((product) => product.id === +productId);
-
-  // if product exists:
-  if (foundProduct) {
-    products = products.filter((product) => product.id !== +productId);
+//--------------------------------------------\\
+/*
+exports.createProduct = async (req, res, next) => {
+  try {
+    if (req.file) req.body.image = `http://${req.get("host")}/${req.file.path}`;
+    const newProduct = await Product.create(req.body);
+    res.status(201).json(newProduct);
+  } catch (error) {
+    next(error);
+  }
+};
+*/
+//-----------------------------------------------\\
+exports.deleteProduct = async (req, res, next) => {
+  try {
+    await req.product.destroy();
     res.status(204).end(); // NO Content
-  } else {
-    //  give back response 404 product Not Found
-    res.status(404).json({ message: "Product Not Found." });
+  } catch (error) {
+    next(error);
   }
 };
 
-exports.createProduct = (req, res) => {
-  // generate ID
-  const id = products.length + 1;
-  // generate slug (using slugify)
-  const slug = slugify(req.body.name, { lower: true });
-  // put them all together with req.body in a new product object (newProduct)
-  const newProduct = {
-    id,
-    slug,
-    ...req.body,
-  };
-  // .push() newProduct onto products
-  products.push(newProduct);
-  // response: 201 CREATED
-  res.status(201).json(newProduct);
-};
-
-exports.updateProduct = (req, res) => {
-  const { productId } = req.params;
-  // check if product exists
-  const foundProduct = products.find((product) => product.id === +productId);
-
-  // if product exists:
-  if (foundProduct) {
-    // update product
-    for (const key in req.body) foundProduct[key] = req.body[key];
-    foundProduct.slug = slugify(foundProduct.name, { lower: true });
-    res.status(204).end();
-  } else {
-    //  give back response 404 product Not Found
-    res.status(404).json({ message: "Product Not Found." });
+//-------------------------------------------\\
+exports.updateProduct = async (req, res, next) => {
+  try {
+    if (req.file) req.body.image = `http://${req.get("host")}/${req.file.path}`;
+    const updatedProduct = await req.product.update(req.body);
+    // res.status(204).end(updatedProduct); // NO Content
+    res.json(updatedProduct);
+  } catch (error) {
+    next(error);
   }
 };
