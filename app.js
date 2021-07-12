@@ -3,6 +3,8 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const productRoutes = require("./API/product/routes");
 const bakeryRoutes = require("./API/bakery/routes");
+const userRoutes = require("./API/user/routes");
+
 //DATEBASE
 const db = require("./db/models/index");
 const app = express();
@@ -14,6 +16,7 @@ app.use(bodyParser.json());
 //=============== Product Routes ===============\\
 app.use("/products", productRoutes);
 app.use("/bakeries", bakeryRoutes);
+app.use(userRoutes);
 app.use("/media", express.static("media"));
 
 //========== Error Handling Middleware ==========\\
