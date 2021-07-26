@@ -4,6 +4,9 @@ const bodyParser = require("body-parser");
 const productRoutes = require("./API/product/routes");
 const bakeryRoutes = require("./API/bakery/routes");
 const userRoutes = require("./API/user/routes");
+const passport = require("passport");
+const { localStrategy } = require("./middleware/passport");
+const { jwtStrategy } = require("./middleware/passport");
 
 //DATEBASE
 const db = require("./db/models/index");
@@ -12,6 +15,9 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+app.use(passport.initialize());
+passport.use(localStrategy);
+passport.use(jwtStrategy);
 
 //=============== Product Routes ===============\\
 app.use("/products", productRoutes);
