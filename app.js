@@ -1,9 +1,13 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+
+//routes
 const productRoutes = require("./API/product/routes");
 const bakeryRoutes = require("./API/bakery/routes");
 const userRoutes = require("./API/user/routes");
+const orderRoutes = require("./API/order/routes");
+
 const passport = require("passport");
 const { localStrategy } = require("./middleware/passport");
 const { jwtStrategy } = require("./middleware/passport");
@@ -22,6 +26,7 @@ passport.use(jwtStrategy);
 //=============== Product Routes ===============\\
 app.use("/products", productRoutes);
 app.use("/bakeries", bakeryRoutes);
+app.use(orderRoutes);
 app.use(userRoutes);
 app.use("/media", express.static("media"));
 
